@@ -37,6 +37,11 @@ void ATFCharacter::SetSprinting(const bool& IsSprinting)
 	Statline->SetSprinting(IsSprinting);
 }
 
+void ATFCharacter::SetSneaking(const bool& IsSneaking)
+{
+	Statline->SetSneaking(IsSneaking);
+}
+
 void ATFCharacter::HasJumped()
 {
 	Statline->HasJumped();

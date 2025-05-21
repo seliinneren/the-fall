@@ -77,12 +77,15 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	FCoreStat Stamina;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FCoreStat Hunger = FCoreStat(100, 100, -0.125);
+	FCoreStat Hunger = FCoreStat(100, 100, -2.125);
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FCoreStat Thirst = FCoreStat(100, 100, -0.25);
+	FCoreStat Thirst = FCoreStat(100, 100, -2.25);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	bool bIsSprinting = false;	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	bool bIsSneaking = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float SprintCostMultiplier = 2.0f;
@@ -93,13 +96,28 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float SprintSpeed = 450.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float SneakSpeed = 75.0f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float JumpCost = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float SecondsForStaminaExhaustion = 5.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float CurrentStaminaExhaustion = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float StarvingHealthDamagePerSecond = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float DehydrationHealthDamagePerSecond = 1.0f;
+
 	void TickStats(const float& DeltaTime);
-
 	void TickStamina(const float& DeltaTime);
-
+	void TickHunger(const float& DeltaTime);
+	void TickThirst(const float& DeltaTime);
 	bool IsValidSprinting();
 
 protected:
@@ -121,6 +139,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SetSprinting(const bool& bSprinting);
+
+	UFUNCTION(BlueprintCallable)
+	void SetSneaking(const bool& bSneaking);
 
 	UFUNCTION(BlueprintCallable)
 	bool CanJump() const;

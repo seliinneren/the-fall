@@ -6,24 +6,54 @@
 
 void UStatlineComponent::TickStats(const float& DeltaTime)
 {
-	Health.TickStat(DeltaTime);
 	TickStamina(DeltaTime);
-	Hunger.TickStat(DeltaTime);
-	Thirst.TickStat(DeltaTime);
+	TickHunger(DeltaTime);
+	TickThirst(DeltaTime);
+	if (Thirst.GetCurrent() <= 0.0 || Hunger.GetCurrent() <= 0.0) 
+	{
+		return;
+	}
+	Health.TickStat(DeltaTime);
 }
 
 void UStatlineComponent::TickStamina(const float& DeltaTime)
 {
+	if (CurrentStaminaExhaustion > 0.0)
+	{
+		CurrentStaminaExhaustion -= DeltaTime;
+		return;
+	}
 	if (bIsSprinting && IsValidSprinting()) 
 	{
-		Stamina.TickStat(0 - (DeltaTime * SprintCostMultiplier));
+		Stamina.TickStat(0 - abs(DeltaTime * SprintCostMultiplier));
 		if (Stamina.GetCurrent() <= 0.0)
 		{
 			SetSprinting(false);
+			CurrentStaminaExhaustion = SecondsForStaminaExhaustion;
 		}
 		return;
 	}
 	Stamina.TickStat(DeltaTime);
+}
+
+void UStatlineComponent::TickHunger(const float& DeltaTime)
+{
+	if (Hunger.GetCurrent() <= 0.0) 
+	{
+		Health.Adjust(0 - abs(StarvingHealthDamagePerSecond * DeltaTime));
+		return;
+	}
+	Hunger.TickStat(DeltaTime);
+}
+
+void UStatlineComponent::TickThirst(const float& DeltaTime)
+{
+	if (Thirst.GetCurrent() <= 0.0)
+	{
+		Health.Adjust(0 - abs(DehydrationHealthDamagePerSecond * DeltaTime));
+		return;
+	}
+	Thirst.TickStat(DeltaTime);
 }
 
 bool UStatlineComponent::IsValidSprinting()
@@ -101,7 +131,23 @@ bool UStatlineComponent::CanSprint() const
 void UStatlineComponent::SetSprinting(const bool& bSprinting)
 {
 	bIsSprinting = bSprinting;
+	if (bIsSneaking && !bIsSprinting)
+	{
+		return;
+	}
+	bIsSneaking = false;
 	OwningCharacterMovementComp->MaxWalkSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
+}
+
+void UStatlineComponent::SetSneaking(const bool& bSneaking)
+{
+	bIsSneaking = bSneaking;
+	if (bIsSprinting && !bIsSneaking)
+	{
+		return;
+	}
+	bIsSprinting = false; 
+	OwningCharacterMovementComp->MaxWalkSpeed = bIsSneaking ? SneakSpeed : WalkSpeed;
 }
 
 bool UStatlineComponent::CanJump() const
