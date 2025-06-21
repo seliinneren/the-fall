@@ -80,6 +80,13 @@ void ATFPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	}
 }
 
+void ATFPlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	/*ATFCharacter::BeginPlay();*/
+	SaveActorID.Invalidate();
+}
+
 void ATFPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D

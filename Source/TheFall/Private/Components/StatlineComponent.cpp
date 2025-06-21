@@ -3,13 +3,14 @@
 
 #include "Components/StatlineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "TFUtils.h"
 
 void UStatlineComponent::TickStats(const float& DeltaTime)
 {
 	TickStamina(DeltaTime);
 	TickHunger(DeltaTime);
 	TickThirst(DeltaTime);
-	if (Thirst.GetCurrent() <= 0.0 || Hunger.GetCurrent() <= 0.0) 
+	if (Thirst.GetCurrent() <= 0.0 || Hunger.GetCurrent() <= 0.0)
 	{
 		return;
 	}
@@ -23,7 +24,7 @@ void UStatlineComponent::TickStamina(const float& DeltaTime)
 		CurrentStaminaExhaustion -= DeltaTime;
 		return;
 	}
-	if (bIsSprinting && IsValidSprinting()) 
+	if (bIsSprinting && IsValidSprinting())
 	{
 		Stamina.TickStat(0 - abs(DeltaTime * SprintCostMultiplier));
 		if (Stamina.GetCurrent() <= 0.0)
@@ -38,7 +39,7 @@ void UStatlineComponent::TickStamina(const float& DeltaTime)
 
 void UStatlineComponent::TickHunger(const float& DeltaTime)
 {
-	if (Hunger.GetCurrent() <= 0.0) 
+	if (Hunger.GetCurrent() <= 0.0)
 	{
 		Health.Adjust(0 - abs(StarvingHealthDamagePerSecond * DeltaTime));
 		return;
@@ -79,7 +80,7 @@ void UStatlineComponent::BeginPlay()
 	OwningCharacterMovementComp->MaxWalkSpeed = WalkSpeed;
 
 	// ...
-	
+
 }
 
 
@@ -87,7 +88,7 @@ void UStatlineComponent::BeginPlay()
 void UStatlineComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if (TickType != ELevelTick::LEVELTICK_PauseTick) 
+	if (TickType != ELevelTick::LEVELTICK_PauseTick)
 	{
 		TickStats(DeltaTime);
 	}
@@ -146,7 +147,7 @@ void UStatlineComponent::SetSneaking(const bool& bSneaking)
 	{
 		return;
 	}
-	bIsSprinting = false; 
+	bIsSprinting = false;
 	OwningCharacterMovementComp->MaxWalkSpeed = bIsSneaking ? SneakSpeed : WalkSpeed;
 }
 
@@ -158,5 +159,45 @@ bool UStatlineComponent::CanJump() const
 void UStatlineComponent::HasJumped()
 {
 	Stamina.Adjust(0 - JumpCost);
+}
+
+FSaveComponentData UStatlineComponent::GetComponentSaveData_Implementation()
+{
+	FSaveComponentData Ret;
+	Ret.ComponentClass = this->GetClass();
+	Ret.RamData.Add(Health.GetSaveString());
+	Ret.RamData.Add(Stamina.GetSaveString());
+	Ret.RamData.Add(Hunger.GetSaveString());
+	Ret.RamData.Add(Thirst.GetSaveString());
+
+	return Ret;
+}
+
+void UStatlineComponent::SetComponentSaveData_Implementation(FSaveComponentData Data)
+{
+	TArray<FString> Parts;
+	for (int i = 0; i < Data.RamData.Num(); i++)
+	{
+		Parts.Empty();
+
+		Parts = ChopString(Data.RamData[i], '|');
+		switch (i)
+		{
+		case 0:
+			Health.UpdateFromSaveString(Parts);
+			break;
+		case 1:
+			Stamina.UpdateFromSaveString(Parts);
+			break;
+		case 2:
+			Hunger.UpdateFromSaveString(Parts);
+			break;
+		case 3:
+			Thirst.UpdateFromSaveString(Parts);
+			break;
+		default:
+			break;
+		}
+	}
 }
 

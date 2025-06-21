@@ -13,12 +13,19 @@ ATFCharacter::ATFCharacter()
 	Statline = CreateDefaultSubobject<UStatlineComponent>(TEXT("Statline"));
 	Statline->SetMovementCompReference(GetCharacterMovement());
 
+	SaveActorID = FGuid::NewGuid(); 
+
 }
 
 // Called when the game starts or when spawned
 void ATFCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(!SaveActorID.IsValid())
+	{
+		SaveActorID = FGuid::NewGuid();
+	}
 	
 }
 
@@ -60,5 +67,28 @@ void ATFCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+FGuid ATFCharacter::GetActorSaveID_Implementation()
+{
+	return SaveActorID;
+}
+
+FSaveActorData ATFCharacter::GetActorSaveData_Implementation()
+{
+	FSaveActorData Ret;
+	Ret.ActorClass = this->GetClass();
+	Ret.ActorTransform = this->GetActorTransform();
+	Ret.WasSpawned = this->WasSpawned;
+	return Ret;
+}
+
+void ATFCharacter::SetActorGuid_Implementation(const FGuid& NewGuid)
+{
+	if (SaveActorID.IsValid())
+	{
+		SaveActorID.Invalidate();
+	}
+	SaveActorID = NewGuid;
 }
 

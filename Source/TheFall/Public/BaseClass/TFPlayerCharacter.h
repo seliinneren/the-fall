@@ -58,6 +58,8 @@ private:
 
 protected:
 
+	virtual void BeginPlay() override;
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
