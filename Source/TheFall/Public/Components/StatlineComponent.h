@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Interface/SaveActorInterface.h"
+#include "Logger.h"
 #include "StatlineComponent.generated.h"
 
 UENUM(BlueprintType)
@@ -75,6 +76,7 @@ public:
 	{
 		if (Parts.Num() != 3)
 		{
+			Logger::GetInstance()->AddMessage("FCoreStat::UpdateFromSaveString called with other than 3 parts", ERRORLEVEL::EL_WARNING);
 			return;
 		}
 		Current = FCString::Atof(*Parts[0]);
